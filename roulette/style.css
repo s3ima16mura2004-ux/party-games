@@ -1,0 +1,563 @@
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    touch-action: manipulation;
+}
+
+body {
+    font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+    text-align: center;
+    color: #f2efe9;
+    margin: 0;
+    min-height: 100vh;
+    -webkit-user-select: none;
+    user-select: none;
+    background-color: #0b0b10;
+    background-image:
+        radial-gradient(circle at 15% 8%, rgba(212, 175, 55, 0.10), transparent 42%),
+        radial-gradient(circle at 88% 92%, rgba(212, 175, 55, 0.07), transparent 46%);
+    background-attachment: fixed;
+}
+
+.app-content {
+    min-height: 100vh;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    padding: 24px 16px 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    flex-shrink: 0;
+}
+
+.screen-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+}
+
+.menu-link {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: #e3cf94;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(10px);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    letter-spacing: 0.5px;
+}
+.subtitle {
+    font-family: "Shippori Mincho", serif;
+    font-size: 14px;
+    color: #c9a86a;
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+}
+h1 {
+    font-family: "Shippori Mincho", serif;
+    font-weight: 600;
+    font-size: clamp(24px, 7vw, 32px);
+    color: #f2efe9;
+    margin-top: 0;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.25);
+}
+
+.card-box {
+    background: rgba(255, 255, 255, 0.045);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 30px 24px;
+    border-radius: 22px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    width: 100%;
+    box-sizing: border-box;
+}
+.card-box h2 {
+    font-family: "Shippori Mincho", serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.settings-link {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: #9a9488;
+    font-size: 13px;
+    text-decoration: underline;
+    margin-bottom: 10px;
+    cursor: pointer;
+    padding: 8px 0;
+    touch-action: manipulation;
+}
+.settings-link:active { color: #e3cf94; }
+
+.player-count-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    margin-bottom: 12px;
+}
+.count-btn {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f2efe9;
+    border-radius: 50%;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: 0.2s;
+}
+.count-btn:active {
+    background: rgba(212, 175, 55, 0.18);
+    border-color: rgba(212, 175, 55, 0.6);
+    color: #f0dca0;
+    transform: scale(0.95);
+}
+
+.name-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 26px;
+}
+.name-input {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f2efe9;
+    padding: 14px 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-user-select: text;
+    user-select: text;
+}
+.name-input::placeholder { color: #6f6a60; }
+
+/* 主要アクションボタン：控えめなシャンパンゴールドのグラデーション */
+.action-btn {
+    font-family: "Shippori Mincho", serif;
+    font-size: 19px;
+    font-weight: 600;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #b8923f, #ecd99c 55%, #b8923f);
+    color: #1a1608;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: 0.15s;
+    width: 100%;
+    min-height: 64px;
+    touch-action: manipulation;
+    letter-spacing: 3px;
+}
+.action-btn:active { transform: scale(0.97); box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2); }
+.action-btn:disabled {
+    background: rgba(255, 255, 255, 0.06);
+    color: #6f6a60;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* もう一度遊ぶ／次の人へ進むボタンは、控えめなエメラルドグラスで差別化 */
+#restartBtn, #nextTurnBtn {
+    background: rgba(72, 187, 120, 0.16);
+    color: #bdeccb;
+    border: 1px solid rgba(72, 187, 120, 0.45);
+    box-shadow: 0 10px 24px rgba(72, 187, 120, 0.12);
+}
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 10px 30px rgba(212, 175, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+    50% { box-shadow: 0 10px 42px rgba(212, 175, 55, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+}
+.pulse-btn { animation: pulseGlow 1.8s ease-in-out infinite; }
+.pulse-btn:active { animation: none; }
+
+.bottom-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(11, 11, 16, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+    border-top: 1px solid rgba(212, 175, 55, 0.18);
+    z-index: 100;
+    max-width: 460px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+@media (min-width: 460px) {
+    .bottom-bar { left: 50%; transform: translateX(-50%); width: 460px; }
+}
+
+.turn-indicator {
+    font-family: "Shippori Mincho", serif;
+    font-size: 20px;
+    color: #e3cf94;
+    margin-bottom: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+}
+
+/* ===== 弾倉のSVGビジュアル ===== */
+.cylinder-wrap {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 10px auto 20px;
+}
+.cylinder-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+#cylinderGroup {
+    transform-origin: 110px 110px;
+    transition: transform 1.5s cubic-bezier(0.17, 0.67, 0.24, 1);
+}
+.cylinder-body {
+    fill: rgba(255, 255, 255, 0.03);
+    stroke: rgba(212, 175, 55, 0.35);
+    stroke-width: 2;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
+}
+.chamber {
+    stroke-width: 1.5;
+    transition: fill 0.3s, stroke 0.3s, opacity 0.3s;
+}
+.chamber-pending { fill: rgba(255, 255, 255, 0.03); stroke: rgba(255, 255, 255, 0.22); }
+.chamber-safe { fill: rgba(72, 187, 120, 0.14); stroke: rgba(72, 187, 120, 0.5); }
+.chamber-hit {
+    fill: rgba(176, 46, 46, 0.9);
+    stroke: #e8cd82;
+    filter: drop-shadow(0 0 10px rgba(176, 46, 46, 0.85));
+}
+.cylinder-pointer {
+    fill: #e8cd82;
+    filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.5));
+}
+.cylinder-wrap .status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-size: clamp(38px, 13vw, 52px);
+}
+
+@keyframes spinDrum {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+    50% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) rotate(720deg) scale(1); }
+}
+.spinning {
+    animation: spinDrum 0.6s ease-in-out;
+}
+
+#message {
+    font-size: 17px;
+    margin-top: 20px;
+    font-weight: 500;
+    color: #ded9cf;
+    min-height: 44px;
+    line-height: 1.6;
+}
+
+@keyframes countPulse {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.3; }
+    50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+.count-pulse {
+    animation: countPulse 0.5s ease-out;
+    color: #e8cd82;
+    font-weight: bold;
+}
+
+/* iPhoneは振動非対応なので、画面フラッシュで体感を補完する（控えめな深紅に調整） */
+.hit-flash {
+    position: fixed;
+    inset: 0;
+    background: #8c2b2b;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 300;
+}
+.hit-flash.flash {
+    animation: flashPulse 0.5s ease-out;
+}
+@keyframes flashPulse {
+    0% { opacity: 0.55; }
+    100% { opacity: 0; }
+}
+
+.option-group {
+    text-align: left;
+    margin-bottom: 24px;
+}
+.option-group h3 {
+    font-family: "Shippori Mincho", serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #c9a86a;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+.option-hint {
+    font-size: 12px;
+    color: #8a8478;
+    margin: 8px 0 0;
+    line-height: 1.5;
+}
+
+/* 現在の設定まとめ表示（ガラスチップ風） */
+.settings-summary {
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #e8cd82;
+    font-weight: 600;
+    text-align: center;
+    margin: -6px 0 24px;
+    letter-spacing: 0.5px;
+}
+
+.chamber-select {
+    display: flex;
+    gap: 10px;
+}
+.chamber-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #b9b3a6;
+    padding: 14px 5px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    touch-action: manipulation;
+    min-height: 56px;
+}
+.chamber-btn span {
+    font-size: 11px;
+    font-weight: normal;
+    color: #7d7768;
+}
+.chamber-btn.active {
+    background: rgba(212, 175, 55, 0.14);
+    border-color: rgba(212, 175, 55, 0.55);
+    color: #f0dca0;
+    box-shadow: 0 0 18px rgba(212, 175, 55, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.chamber-btn.active span { color: #d9c58e; }
+.chamber-btn:active { transform: scale(0.96); }
+
+.custom-penalty-row {
+    display: flex;
+    gap: 8px;
+}
+.custom-penalty-row .name-input {
+    flex: 1;
+}
+.add-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #f2efe9;
+    border-radius: 12px;
+    padding: 0 22px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 48px;
+    font-size: 15px;
+}
+.add-btn:active {
+    background: rgba(212, 175, 55, 0.18);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #f0dca0;
+}
+
+.custom-penalty-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+}
+.custom-penalty-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+.custom-penalty-list li button {
+    background: none;
+    border: none;
+    color: #c97a6a;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 6px 0 6px 14px;
+    touch-action: manipulation;
+}
+
+.combo-banner {
+    font-family: "Shippori Mincho", serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #e8cd82;
+    min-height: 0;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease;
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+}
+.combo-banner.show {
+    opacity: 1;
+    max-height: 60px;
+    margin-bottom: 10px;
+    animation: comboPop 0.4s ease-out;
+}
+@keyframes comboPop {
+    0% { transform: scale(0.8); }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+.penalty-picker {
+    margin-top: 16px;
+    text-align: left;
+}
+.penalty-choice-btn {
+    display: block;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ded9cf;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    text-align: left;
+    margin-bottom: 8px;
+    cursor: pointer;
+    touch-action: manipulation;
+    box-sizing: border-box;
+}
+.penalty-choice-btn:active {
+    background: rgba(212, 175, 55, 0.16);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #f0dca0;
+}
+.penalty-custom-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+.penalty-custom-row .name-input { flex: 1; }
+
+.result-summary {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.035);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 16px;
+    text-align: left;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+}
+.result-summary h3 {
+    font-family: "Shippori Mincho", serif;
+    color: #e8cd82;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+.result-summary p {
+    font-size: 14px;
+    color: #ded9cf;
+    margin: 8px 0;
+}
+
+.hit-record-list {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 10px;
+}
+.hit-record-list li {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #ded9cf;
+}
+
+/* ===== レスポンシブ対応 ===== */
+
+@media (max-width: 340px) {
+    .app-content { padding: 18px 10px 130px; }
+    .card-box { padding: 22px 16px; }
+    .player-count-control { gap: 14px; }
+    .count-btn { width: 46px; height: 46px; font-size: 20px; }
+    .chamber-select { gap: 6px; }
+    .chamber-btn { padding: 10px 2px; font-size: 12px; min-height: 50px; }
+    .chamber-btn span { font-size: 10px; }
+    .action-btn { font-size: 16px; padding: 16px 20px; min-height: 56px; letter-spacing: 1.5px; }
+    .cylinder-wrap { width: 180px; height: 180px; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .app-content { padding: 14px 16px 110px; }
+    h1 { margin-bottom: 10px; }
+    .card-box { padding: 16px 22px; }
+    .cylinder-wrap { width: 140px; height: 140px; margin: 6px auto 10px; }
+    .turn-indicator { margin-bottom: 8px; }
+    #message { min-height: 0; margin-top: 10px; }
+    .bottom-bar { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+    .action-btn { min-height: 52px; padding: 12px 30px; }
+}
+
+@media (min-width: 700px) {
+    .app-content { max-width: 480px; margin: 0 auto; }
+    .card-box { max-width: 480px; padding: 36px 32px; }
+    .bottom-bar { width: 480px; }
+}

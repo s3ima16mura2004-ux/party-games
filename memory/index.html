@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#120318">
+    <title>罰ゲーム神経衰弱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase（複数端末オンライン対戦用） -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+
+    <div class="top-bar">
+        <a href="../index.html" class="menu-link">⬅ メニューに戻る</a>
+    </div>
+
+    <header class="game-header">
+        <div class="eyebrow">🎪 特設会場</div>
+        <div class="subtitle">記憶力勝負</div>
+        <h1 class="neon-title" data-text="罰ゲーム神経衰弱">罰ゲーム神経衰弱</h1>
+    </header>
+
+    <!-- 【ステップ0】 モード選択画面 -->
+    <div class="card-box" id="modeSelectScreen">
+        <h2>遊びかたを選んでね</h2>
+        <div class="mode-buttons">
+            <button class="mode-btn" onclick="goToOfflineSetup()">
+                <span class="mode-btn-title">📱 1台の端末でみんなで</span>
+                <span class="mode-btn-desc">スマホを回して遊ぶ、いつものパス＆プレイ</span>
+            </button>
+            <button class="mode-btn" onclick="goToOnlineEntry()">
+                <span class="mode-btn-title">🌐 複数端末でオンライン対戦</span>
+                <span class="mode-btn-desc">各自のスマホからルームに参加してリアルタイム対戦</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 【ステップ1】 設定画面（オフライン） -->
+    <div class="card-box" id="setupScreen" style="display: none;">
+        <button class="back-link" onclick="backToModeSelect()">⬅ モード選択に戻る</button>
+        <h2>ゲーム設定</h2>
+        
+        <div class="setting-group">
+            <label>参加人数</label>
+            <div class="control-row">
+                <button class="count-btn" onclick="changePlayerCount(-1)">−</button>
+                <span id="playerCountText" class="count-display">2</span>
+                <button class="count-btn" onclick="changePlayerCount(1)">＋</button>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <label>難易度（ペアの数）</label>
+            <div class="difficulty-buttons">
+                <button class="diff-btn active" data-pairs="4" onclick="setDifficulty(4, this)">4ペア (8枚)</button>
+                <button class="diff-btn" data-pairs="6" onclick="setDifficulty(6, this)">6ペア (12枚) 👑</button>
+                <button class="diff-btn" data-pairs="8" onclick="setDifficulty(8, this)">8ペア (16枚) 👑🔄</button>
+            </div>
+            <div class="hint-text">参加人数に合わせて自動調整されます（タップで手動変更も可）／👑王様カード＝6ペア以上、🔄シャッフルカード＝8ペア以上で登場</div>
+        </div>
+        
+        <div class="setting-group">
+            <label>1ターンの制限時間</label>
+            <div class="difficulty-buttons">
+                <button class="timer-btn" data-seconds="5" onclick="setTimerDuration(5, this)">5秒</button>
+                <button class="timer-btn active" data-seconds="10" onclick="setTimerDuration(10, this)">10秒</button>
+                <button class="timer-btn" data-seconds="15" onclick="setTimerDuration(15, this)">15秒</button>
+                <button class="timer-btn" data-seconds="20" onclick="setTimerDuration(20, this)">20秒</button>
+            </div>
+        </div>
+
+        <div id="nameInputsContainer" class="name-inputs"></div>
+
+        <div class="setting-group">
+            <label>音声・振動演出</label>
+            <label class="toggle-label">
+                <input type="checkbox" id="soundToggle" checked>
+                🔔 効果音を鳴らす
+            </label>
+            <label class="toggle-label">
+                <input type="checkbox" id="voiceToggle" checked>
+                🗣️ イベントを音声で読み上げる
+            </label>
+        </div>
+
+        <div class="setting-group">
+            <label>カスタム罰ゲーム編集（1行につき1つ／空欄ならデフォルトを使用）</label>
+            <textarea id="customPenaltyInput" class="penalty-textarea" placeholder="例）変な顔で自撮り&#10;一発ギャグを披露する&#10;好きな人の名前を叫ぶ"></textarea>
+        </div>
+
+        <button class="action-btn" onclick="startGame()">ゲーム開始</button>
+    </div>
+
+    <!-- 【ステップ2】 ゲーム本番画面 -->
+    <div class="card-box" id="gameScreen" style="display: none;">
+        <div class="info-bar">
+            <span id="turnIndicator" class="turn-indicator">プレイヤー1の番</span>
+            <span id="timerBox" class="timer-box">残り: 10秒</span>
+        </div>
+        
+        <div id="scoreBoard" class="score-board">スコア: 0</div>
+
+        <div class="grid" id="board"></div>
+        
+        <div id="eventMessage" class="event-message" aria-live="polite" role="status">カードをめくってね</div>
+
+        <div class="result-actions" id="resultActions" style="display: none;">
+            <button class="action-btn restart-same-btn" onclick="quickPlayAgain()">🔁 同じメンバーでもう一度</button>
+            <button class="action-btn restart-btn" onclick="returnToSetup()">⚙ 設定に戻る</button>
+        </div>
+    </div>
+
+    <!-- 【オンライン】ルーム作成・参加画面 -->
+    <div class="card-box" id="onlineEntryScreen" style="display: none;">
+        <button class="back-link" onclick="backToModeSelect()">⬅ モード選択に戻る</button>
+        <h2>オンライン対戦</h2>
+
+        <div class="setting-group">
+            <label>あなたの名前</label>
+            <input type="text" id="onlineMyName" class="name-input" placeholder="プレイヤー名" maxlength="12">
+        </div>
+
+        <div class="online-tabs">
+            <button class="online-tab-btn active" id="createTabBtn" onclick="switchOnlineTab('create')">ルームを作る</button>
+            <button class="online-tab-btn" id="joinTabBtn" onclick="switchOnlineTab('join')">ルームに参加</button>
+        </div>
+
+        <div id="createTabPanel">
+            <p class="hint-text">ホストとしてルームを作成し、発行されたコードを他の人に伝えてください。</p>
+            <button class="action-btn" onclick="createRoom()">🏮 ルームを作成する</button>
+        </div>
+
+        <div id="joinTabPanel" style="display: none;">
+            <div class="setting-group">
+                <label>ルームコード（5文字）</label>
+                <input type="text" id="roomCodeInput" class="name-input room-code-input" placeholder="例：A3K9P" maxlength="5" autocapitalize="characters">
+            </div>
+            <button class="action-btn" onclick="joinRoom()">🚪 参加する</button>
+        </div>
+
+        <div id="onlineEntryError" class="error-text"></div>
+    </div>
+
+    <!-- 【オンライン】待機ルーム画面 -->
+    <div class="card-box" id="waitingRoomScreen" style="display: none;">
+        <h2>待機ルーム</h2>
+        <div class="room-code-display">
+            <span class="room-code-label">ルームコード</span>
+            <span class="room-code-value" id="roomCodeDisplay">-----</span>
+        </div>
+        <p class="hint-text">このコードを他の参加者に伝えてください（最大6人まで参加できます）</p>
+
+        <div class="setting-group" id="hostSettingsGroup" style="display: none;">
+            <label>1ターンの制限時間（ホストのみ変更可）</label>
+            <div class="difficulty-buttons">
+                <button class="timer-btn" data-seconds="5" onclick="setOnlineTimerDuration(5, this)">5秒</button>
+                <button class="timer-btn active" data-seconds="10" onclick="setOnlineTimerDuration(10, this)">10秒</button>
+                <button class="timer-btn" data-seconds="15" onclick="setOnlineTimerDuration(15, this)">15秒</button>
+                <button class="timer-btn" data-seconds="20" onclick="setOnlineTimerDuration(20, this)">20秒</button>
+            </div>
+            <div class="hint-text">ペア数（難易度）は参加人数に合わせて自動調整されます</div>
+        </div>
+
+        <label class="setting-group-title">参加者一覧</label>
+        <ul class="player-list" id="waitingPlayerList"></ul>
+
+        <button class="action-btn" id="startOnlineGameBtn" onclick="startOnlineGame()" style="display: none;">🎉 ゲーム開始（ホスト）</button>
+        <div class="hint-text" id="waitingForHostText">ホストの開始を待っています…</div>
+
+        <button class="action-btn leave-btn" onclick="leaveRoom()">🚪 ルームを退出する</button>
+    </div>
+
+    <!-- 【オンライン】ゲーム本番画面 -->
+    <div class="card-box" id="onlineGameScreen" style="display: none;">
+        <div class="room-code-display room-code-mini">
+            <span class="room-code-label">ROOM</span>
+            <span class="room-code-value" id="onlineRoomCodeDisplay">-----</span>
+        </div>
+        <div class="info-bar">
+            <span id="onlineTurnIndicator" class="turn-indicator">プレイヤー1の番</span>
+            <span id="onlineTimerBox" class="timer-box">残り: 10秒</span>
+        </div>
+
+        <div id="onlineScoreBoard" class="score-board">スコア: 0</div>
+
+        <div class="grid" id="onlineBoard"></div>
+
+        <div id="onlineEventMessage" class="event-message" aria-live="polite" role="status">カードをめくってね</div>
+
+        <div class="hint-text" id="onlineTurnHint"></div>
+
+        <div class="result-actions" id="onlineResultActions" style="display: none;">
+            <button class="action-btn restart-same-btn" id="onlineQuickPlayBtn" onclick="onlineQuickPlayAgain()" style="display: none;">🔁 同じメンバーでもう一度（ホスト）</button>
+            <button class="action-btn restart-btn" onclick="leaveRoom()">🚪 ルームを退出する</button>
+        </div>
+
+        <button class="host-rescue-btn" id="hostRescueBtn" onclick="hostForceAdvanceTurn()" style="display: none;">🛠️ 手番が止まった時はこちら（ホスト用）</button>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="online.js"></script>
+</body>
+</html>

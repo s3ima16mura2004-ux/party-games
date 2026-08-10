@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>王様ゲーム | パーティー抽選所</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/king-game.css?v=6">
+</head>
+<body>
+
+<div class="night-sky" aria-hidden="true">
+  <div class="lantern lantern-a"></div>
+  <div class="lantern lantern-b"></div>
+  <div class="lantern lantern-c"></div>
+  <div class="stars"></div>
+  <div class="season-fx">
+    <span class="fx-particle fx-sakura p1"></span>
+    <span class="fx-particle fx-sakura p2"></span>
+    <span class="fx-particle fx-sakura p3"></span>
+    <span class="fx-particle fx-sakura p4"></span>
+    <span class="fx-particle fx-snow p1"></span>
+    <span class="fx-particle fx-snow p2"></span>
+    <span class="fx-particle fx-snow p3"></span>
+    <span class="fx-particle fx-snow p4"></span>
+    <span class="fx-particle fx-leaf p1"></span>
+    <span class="fx-particle fx-leaf p2"></span>
+    <span class="fx-particle fx-leaf p3"></span>
+    <span class="fx-particle fx-leaf p4"></span>
+    <span class="fx-particle fx-ember p1"></span>
+    <span class="fx-particle fx-ember p2"></span>
+    <span class="fx-particle fx-ember p3"></span>
+    <span class="fx-particle fx-ember p4"></span>
+  </div>
+</div>
+
+<div id="error-banner" class="error-banner" role="alert" hidden>
+  <span id="error-banner-text"></span>
+  <button id="error-banner-close" class="error-banner-close" aria-label="閉じる">×</button>
+</div>
+
+<header class="app-header">
+  <p class="eyebrow">パーティー抽選所</p>
+  <h1 class="brand">王様ゲーム</h1>
+  <p id="round-indicator" class="round-indicator" hidden></p>
+  <div class="header-controls">
+    <button id="btn-toggle-sound" class="icon-btn" type="button" aria-label="サウンドの切り替え">🔔</button>
+    <select id="theme-select" class="theme-select" aria-label="テーマを選ぶ">
+      <option value="auto">🎨 自動(季節)</option>
+      <option value="night">🏮 常夜</option>
+      <option value="spring">🌸 春</option>
+      <option value="summer">🎆 夏</option>
+      <option value="autumn">🍁 秋</option>
+      <option value="winter">❄️ 冬</option>
+    </select>
+  </div>
+</header>
+
+<main id="app" class="app-shell">
+
+  <!-- ============ 画面1: ホーム(作る/参加する) ============ -->
+  <section id="screen-home" class="screen is-active">
+    <div class="card card-choice">
+      <h2 class="card-title">今夜の席を選ぶ</h2>
+
+      <div class="choice-block">
+        <h3>幹事として部屋を作る</h3>
+        <label class="field-label" for="host-name">あなたの名前</label>
+        <input id="host-name" class="text-input" type="text" placeholder="例: たなか" maxlength="12">
+        <label class="field-label" for="host-exemption-count">免除カード(一人あたり)</label>
+        <select id="host-exemption-count" class="text-input">
+          <option value="3" selected>3枚</option>
+          <option value="4">4枚</option>
+          <option value="5">5枚</option>
+        </select>
+        <p class="hint-text">気が乗らない命令が来た時に、対象者が使うと免除される回数です</p>
+        <button id="btn-create-room" class="btn btn-primary">部屋を作る</button>
+      </div>
+
+      <div class="divider"><span>または</span></div>
+
+      <div class="choice-block">
+        <h3>招待された部屋に入る</h3>
+        <p class="field-label">部屋コード</p>
+        <div id="join-code-boxes" class="code-boxes">
+          <input class="code-box" type="text" inputmode="text" maxlength="1" autocomplete="off" name="room-code-1" aria-label="部屋コード 1文字目">
+          <input class="code-box" type="text" inputmode="text" maxlength="1" autocomplete="off" name="room-code-2" aria-label="部屋コード 2文字目">
+          <input class="code-box" type="text" inputmode="text" maxlength="1" autocomplete="off" name="room-code-3" aria-label="部屋コード 3文字目">
+          <input class="code-box" type="text" inputmode="text" maxlength="1" autocomplete="off" name="room-code-4" aria-label="部屋コード 4文字目">
+          <input class="code-box" type="text" inputmode="text" maxlength="1" autocomplete="off" name="room-code-5" aria-label="部屋コード 5文字目">
+          <input class="code-box" type="text" inputmode="text" maxlength="1" autocomplete="off" name="room-code-6" aria-label="部屋コード 6文字目">
+        </div>
+        <label class="field-label" for="join-name">あなたの名前</label>
+        <input id="join-name" class="text-input" type="text" placeholder="例: さとう" maxlength="12">
+        <button id="btn-join-room" class="btn btn-secondary">参加する</button>
+      </div>
+
+      <p id="home-error" class="error-text" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- ============ 画面2: 待合室 ============ -->
+  <section id="screen-lobby" class="screen">
+    <div id="lobby-onboarding" class="card onboarding-card" hidden>
+      <p>🏮 <strong>王様ゲームへようこそ。</strong>部屋コードやQRコードを仲間に共有して、3人以上集まったら幹事がくじ引きを開始します。くじで王様になった人がお題を選んで発表し、対象者がそれをこなす、というシンプルな流れです。</p>
+      <button id="btn-close-onboarding" class="btn btn-ghost btn-small" type="button">わかった</button>
+    </div>
+
+    <div class="card">
+      <div class="room-code-block">
+        <p class="field-label">部屋コード</p>
+        <div class="room-code-display" id="lobby-room-code">------</div>
+        <div id="lobby-qr-wrap" class="qr-wrap">
+          <div id="lobby-qr-canvas"></div>
+        </div>
+        <p class="hint-text qr-hint">スマホのカメラでQRを読み取ると自動で参加できます</p>
+        <button id="btn-copy-link" class="btn btn-ghost btn-small">招待リンクをコピー</button>
+        <p id="copy-feedback" class="copy-feedback"></p>
+      </div>
+
+      <h2 class="card-title">集まった人たち <span id="lobby-count">(0)</span></h2>
+      <ul id="lobby-player-list" class="player-list"></ul>
+
+      <div id="lobby-host-controls" class="host-controls" hidden>
+        <p class="hint-text">3人以上集まったらくじを引けます。</p>
+        <button id="btn-start-draw" class="btn btn-primary" disabled>くじ引き開始</button>
+        <button id="btn-close-room" class="btn btn-ghost btn-small btn-danger">部屋を解散する</button>
+      </div>
+      <div id="lobby-guest-note" class="hint-text" hidden>幹事がくじ引きを始めるのを待っています…</div>
+
+      <details id="lobby-history-panel" class="history-panel" hidden>
+        <summary>これまでの命令</summary>
+        <ul id="lobby-history-list" class="history-list"></ul>
+      </details>
+
+      <details id="local-rules-panel" class="history-panel" open>
+        <summary>📋 今夜のローカルルール</summary>
+        <div id="local-rules-host-controls" class="local-rules-body" hidden>
+          <label class="field-label" for="local-rules-note-input">今夜のメモ(全員に表示されます)</label>
+          <textarea id="local-rules-note-input" class="text-input textarea-input" rows="2" maxlength="200" placeholder="例: 一発ギャグはNG、苦手なことは無理に強要しない"></textarea>
+          <button id="btn-save-local-rules-note" class="btn btn-ghost btn-small" type="button">メモを保存</button>
+
+          <label class="field-label">NGワード(このワードを含むお題は選ばれなくなります)</label>
+          <div id="ng-word-chips" class="category-chips"></div>
+          <input id="ng-word-input" class="text-input" type="text" placeholder="例: イッキ" maxlength="20">
+          <button id="btn-add-ng-word" class="btn btn-ghost btn-small" type="button">追加</button>
+
+          <label class="field-label">今回は使わないカテゴリ</label>
+          <div id="category-exclude-checks" class="category-exclude-list"></div>
+        </div>
+        <div id="local-rules-guest-view" class="local-rules-body">
+          <p id="local-rules-note-display" class="hint-text"></p>
+          <div id="ng-word-chips-readonly" class="category-chips"></div>
+          <div id="category-exclude-readonly" class="category-chips"></div>
+        </div>
+      </details>
+
+      <details id="toast-roulette-panel" class="history-panel">
+        <summary>🎉 役割ルーレットを回す</summary>
+        <div class="toast-roulette-body">
+          <p class="hint-text">音頭取りや買い出し係などをランダムで決められます(ソフトドリンクの人もぜひ)</p>
+          <div id="toast-role-chips" class="category-chips"></div>
+          <input id="toast-custom-role" class="text-input" type="text" placeholder="役割を自由入力してもOK(例: 二次会の店決め係)" maxlength="20">
+          <p id="toast-roulette-display" class="roulette-display" hidden></p>
+          <button id="btn-spin-toast" class="btn btn-secondary btn-small" type="button">🎲 回す!</button>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 画面3: 抽選/自分の番号 ============ -->
+  <section id="screen-draw" class="screen">
+    <div class="card card-center">
+      <p class="eyebrow">あなたの札</p>
+      <div id="draw-card" class="draw-card">
+        <div class="draw-card-inner">
+          <div class="draw-card-face draw-card-front">
+            <span class="lantern-icon">🏮</span>
+          </div>
+          <div class="draw-card-face draw-card-back">
+            <p class="draw-number-label">あなたは</p>
+            <p id="draw-number" class="draw-number">?</p>
+            <p class="draw-number-label">番</p>
+            <p id="draw-king-badge" class="king-badge" hidden>👑 あなたが王様です</p>
+          </div>
+        </div>
+      </div>
+      <p id="draw-wait-note" class="hint-text">まもなく発表されます…</p>
+      <p id="draw-thinking-note" class="hint-text" hidden>👑 王様が命令を考え中です…</p>
+    </div>
+
+    <!-- 投票制で命令テンプレートを決める場合のパネル(王様・参加者どちらにも表示) -->
+    <div id="vote-panel" class="card" hidden>
+      <h2 class="card-title">📊 命令をみんなで投票</h2>
+      <ul id="vote-options-list" class="vote-options-list"></ul>
+      <div id="vote-king-controls" class="host-controls" hidden>
+        <button id="btn-close-vote" class="btn btn-primary">投票を締め切って決定する</button>
+        <button id="btn-cancel-vote" class="btn btn-ghost btn-small">投票をやめて自分で選ぶ</button>
+      </div>
+      <p id="vote-guest-note" class="hint-text" hidden>王様が投票を締め切るのを待っています…</p>
+    </div>
+
+    <!-- 王様だけに見える命令フォーム -->
+    <div id="king-command-panel" class="card" hidden>
+      <h2 class="card-title">👑 王様の命令
+        <button id="btn-king-help" class="help-btn" type="button" aria-label="使い方を見る">?</button>
+      </h2>
+
+      <div id="king-help-box" class="help-box" hidden>
+        <p>お題は下のカテゴリから選ぶか、🎲ランダムで決めることもできます。「みんなで投票する」に切り替えると参加者に3択で決めてもらえます。</p>
+        <p>命令内容は自由に書き換えられます。既存のお題を使わずに自分で考えた場合は、下のチェックを入れるとこの部屋だけのオリジナルお題として保存できます。</p>
+        <button id="btn-close-king-help" class="btn btn-ghost btn-small" type="button">閉じる</button>
+      </div>
+
+      <div class="mode-toggle">
+        <button id="btn-mode-manual" class="mode-toggle-btn is-active" type="button" aria-pressed="true">自分で選ぶ</button>
+        <button id="btn-mode-vote" class="mode-toggle-btn" type="button" aria-pressed="false">みんなで投票する</button>
+      </div>
+
+      <div id="manual-template-block">
+      <label class="field-label">お題を選ぶ</label>
+
+      <div id="template-picker-section">
+      <details id="draw-history-panel" class="history-panel" hidden>
+        <summary>これまでの命令から選び直す</summary>
+        <ul id="draw-history-list" class="history-list"></ul>
+      </details>
+
+      <div class="picker-chip-row" role="group" aria-label="お題のカテゴリを選ぶ">
+        <div id="category-chips" class="category-chips"></div>
+        <button id="custom-template-chip" class="category-chip custom-chip" type="button" hidden aria-pressed="false">🌟 この部屋のオリジナル</button>
+      </div>
+
+      <input id="template-search" class="text-input template-search" type="search" placeholder="🔍 キーワードで絞り込む(例: 乾杯)" aria-label="お題をキーワードで絞り込む">
+
+      <div class="roulette-controls">
+        <button id="btn-roulette-all" class="btn btn-secondary btn-small" type="button">🎲 全部からランダム</button>
+        <button id="btn-roulette-category" class="btn btn-ghost btn-small" type="button" hidden>🎲 このカテゴリから</button>
+      </div>
+      <p id="roulette-display" class="roulette-display" hidden></p>
+
+      <ul id="template-item-list" class="template-item-list"></ul>
+      </div>
+
+      <div id="target-select-block" class="target-select-block" hidden>
+        <div class="target-select-item">
+          <label class="field-label" for="target-a-select">対象①</label>
+          <select id="target-a-select" class="text-input"></select>
+        </div>
+        <div id="target-b-block" class="target-select-item" hidden>
+          <label class="field-label" for="target-b-select">対象②</label>
+          <select id="target-b-select" class="text-input"></select>
+        </div>
+      </div>
+
+      <button id="btn-reroll" class="btn btn-ghost btn-small" hidden>番号をランダムに引き直す</button>
+      </div>
+
+      <label class="field-label" for="command-text">命令内容(自由に編集できます)</label>
+      <textarea id="command-text" class="text-input textarea-input" rows="3" placeholder="例: ①番の人が一発ギャグをする"></textarea>
+
+      <label id="save-as-template-row" class="checkbox-label">
+        <input type="checkbox" id="save-as-template-check">
+        ☆ このお題をこの部屋のオリジナルテンプレートとして保存する
+      </label>
+
+      <button id="btn-send-command" class="btn btn-primary">この命令を発表する</button>
+    </div>
+  </section>
+
+  <!-- ============ 画面4: 命令発表 ============ -->
+  <section id="screen-command" class="screen">
+    <div class="card card-center">
+      <p class="eyebrow">王様の命令</p>
+      <div class="command-scroll">
+        <p id="command-display" class="command-display"></p>
+      </div>
+      <button id="btn-speak-command" class="btn btn-ghost btn-small">🔊 読み上げる</button>
+      <p class="hint-text">あなたは <strong id="command-my-number"></strong>番でした</p>
+
+      <div class="weak-vote-block">
+        <button id="btn-weak-vote" class="btn btn-ghost btn-small" hidden>😅 ちょっと弱いかも</button>
+        <p id="weak-vote-count" class="hint-text"></p>
+      </div>
+
+      <div id="exemption-block" class="exemption-block" hidden>
+        <button id="btn-use-exemption" class="btn btn-ghost btn-small" type="button">🛡️ 免除カードを使う(残り<span id="exemption-remaining-count">0</span>枚)</button>
+        <p id="exemption-used-note" class="hint-text" hidden>🛡️ この命令は免除カードで免除しました</p>
+      </div>
+
+      <div id="command-host-controls" class="host-controls" hidden>
+        <button id="btn-next-round" class="btn btn-primary">もう一度くじを引く</button>
+        <button id="btn-close-room-2" class="btn btn-ghost btn-small btn-danger">部屋を解散する</button>
+      </div>
+      <div id="command-guest-note" class="hint-text" hidden>幹事が次のラウンドを始めるのを待っています…</div>
+
+      <div class="moment-post-block">
+        <p class="field-label">📷 証拠写真・ひとことコメント</p>
+        <div id="moment-photo-preview" class="moment-photo-preview" hidden>
+          <img id="moment-photo-preview-img" alt="添付した写真のプレビュー">
+          <button id="btn-remove-moment-photo" class="btn btn-ghost btn-small" type="button">✕ 写真を外す</button>
+        </div>
+        <input id="moment-photo-input" type="file" accept="image/*" capture="environment" hidden>
+        <button id="btn-take-moment-photo" class="btn btn-ghost btn-small" type="button">📷 写真を撮る</button>
+        <input id="moment-comment-input" class="text-input" type="text" placeholder="ひとことコメント(例: 大爆笑でした)" maxlength="60">
+        <button id="btn-post-moment" class="btn btn-secondary btn-small" type="button">この瞬間を記録する</button>
+      </div>
+
+      <ul id="moments-feed" class="moments-feed"></ul>
+
+      <details id="command-history-panel" class="history-panel" hidden>
+        <summary>これまでの命令</summary>
+        <ul id="command-history-list" class="history-list"></ul>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 画面5: 解散前のサマリー ============ -->
+  <section id="screen-summary" class="screen">
+    <div class="card card-center">
+      <p class="eyebrow">今宵の記録</p>
+      <h2 class="card-title">お疲れ様でした🏮</h2>
+      <p class="hint-text">今夜は<strong id="summary-round-count">0</strong>ラウンド遊びました</p>
+
+      <h3 class="summary-subtitle">👑 王様ランキング</h3>
+      <ul id="summary-king-ranking" class="summary-ranking-list"></ul>
+
+      <p id="summary-weak-highlight" class="summary-weak-highlight" hidden></p>
+
+      <div id="summary-gallery" class="summary-gallery" hidden>
+        <h3 class="summary-subtitle">📸 今日のベストショット</h3>
+        <div class="summary-gallery-viewport">
+          <img id="summary-gallery-img" class="summary-gallery-img" alt="記録された瞬間の写真" hidden>
+          <p id="summary-gallery-comment" class="summary-gallery-comment"></p>
+          <p id="summary-gallery-meta" class="hint-text"></p>
+        </div>
+        <div class="summary-gallery-nav">
+          <button id="btn-gallery-prev" class="btn btn-ghost btn-small" type="button">← 前へ</button>
+          <span id="summary-gallery-position" class="hint-text"></span>
+          <button id="btn-gallery-next" class="btn btn-ghost btn-small" type="button">次へ →</button>
+        </div>
+      </div>
+
+      <button id="btn-copy-report" class="btn btn-ghost btn-small" type="button">📋 レポートをコピーする</button>
+      <button id="btn-confirm-close-room" class="btn btn-primary">解散して終了する</button>
+      <button id="btn-cancel-close-room" class="btn btn-ghost btn-small">キャンセルして戻る</button>
+    </div>
+  </section>
+
+  <p id="global-status" class="global-status" aria-live="polite"></p>
+</main>
+
+<!-- Firebase (compat SDK, CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="../js/qrcode-lib.js?v=1"></script>
+<script src="../js/king-game-config.js?v=1"></script>
+<script src="../js/king-game-templates.js?v=1"></script>
+<script src="../js/king-game-core.js?v=1"></script>
+<script src="../js/king-game-lobby.js?v=1"></script>
+<script src="../js/king-game-room.js?v=1"></script>
+<script src="../js/king-game-draw.js?v=1"></script>
+<script src="../js/king-game-command.js?v=1"></script>
+
+</body>
+</html>
